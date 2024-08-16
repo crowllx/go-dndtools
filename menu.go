@@ -2,33 +2,36 @@ package main
 
 import (
 	"fmt"
-
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type initModel struct {
+type menuModel struct {
 	choices  []character
 	cursor   int
 	selected map[int]struct{}
+	width    int
+	height   int
 }
 
-func initialModel(clist []character) initModel {
+func initialModel(clist []character) menuModel {
 	var choices []string
 	for _, char := range clist {
 		choices = append(choices, char.Name)
 	}
-	return initModel{
+	return menuModel{
 		choices:  clist,
 		selected: make(map[int]struct{}),
 	}
 }
 
-func (m initModel) Init() tea.Cmd {
+func (m menuModel) Init() tea.Cmd {
 	return nil
 }
 
-func (m initModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m menuModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.width, m.height = msg.Width, msg.Height
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c", "q":
@@ -41,12 +44,12 @@ func (m initModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.cursor < len(m.choices)-1 {
 				m.cursor++
 			}
-		case "enter", " ":
+		case "enter":
 			_, ok := m.selected[m.cursor]
 			if ok {
 				delete(m.selected, m.cursor)
-				nextModel := &modelSheet{data: m.choices[m.cursor]}
-				return nextModel, nil
+                nextModel := NewApp(&m, m.width, m.height, m.choices[m.cursor])
+				return &nextModel, nil
 			} else {
 				m.selected[m.cursor] = struct{}{}
 			}
@@ -55,7 +58,7 @@ func (m initModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m initModel) View() string {
+func (m menuModel) View() string {
 	s := "choose a character:\n"
 	for i, choice := range m.choices {
 		cursor := " "
@@ -71,4 +74,3 @@ func (m initModel) View() string {
 	s += "\nPress q to quit.\n"
 	return s
 }
-
