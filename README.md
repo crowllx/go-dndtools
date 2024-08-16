@@ -1,4 +1,4 @@
-### go dnd tools
+## go dnd tools
 
 set of tools for managing dnd characters written in go.
 
@@ -10,7 +10,7 @@ current goals:
 
 some ideas of what to log
 * attacks/misses
-* # enemies/types of enemeies
+* number of enemies/types of enemeies
 * damage dealt
 * exploration events/occurences
 
